@@ -1294,9 +1294,39 @@
       <column caption='Support URL' datatype='string' name='[SupportURL]' role='dimension' type='nominal' />
       <column caption='Supported Languages' datatype='string' name='[SupportedLanguages]' role='dimension' type='nominal' />
       <_.fcp.ObjectModelTableType.true...column caption='games-features.csv' datatype='table' name='[__tableau_internal_object_id__].[games-features.csv_2E3A0F07E1E44A0E911F45B37FF30D97]' role='measure' type='quantitative' />
+      <column-instance column='[GenreIsAction]' derivation='None' name='[none:GenreIsAction:nk]' pivot='key' type='nominal' />
+      <column-instance column='[GenreIsAdventure]' derivation='None' name='[none:GenreIsAdventure:nk]' pivot='key' type='nominal' />
+      <column-instance column='[GenreIsCasual]' derivation='None' name='[none:GenreIsCasual:nk]' pivot='key' type='nominal' />
+      <column-instance column='[GenreIsEarlyAccess]' derivation='None' name='[none:GenreIsEarlyAccess:nk]' pivot='key' type='nominal' />
+      <column-instance column='[GenreIsFreeToPlay]' derivation='None' name='[none:GenreIsFreeToPlay:nk]' pivot='key' type='nominal' />
+      <column-instance column='[GenreIsIndie]' derivation='None' name='[none:GenreIsIndie:nk]' pivot='key' type='nominal' />
+      <column-instance column='[GenreIsMassivelyMultiplayer]' derivation='None' name='[none:GenreIsMassivelyMultiplayer:nk]' pivot='key' type='nominal' />
+      <column-instance column='[GenreIsNonGame]' derivation='None' name='[none:GenreIsNonGame:nk]' pivot='key' type='nominal' />
+      <column-instance column='[GenreIsRPG]' derivation='None' name='[none:GenreIsRPG:nk]' pivot='key' type='nominal' />
+      <column-instance column='[GenreIsRacing]' derivation='None' name='[none:GenreIsRacing:nk]' pivot='key' type='nominal' />
+      <column-instance column='[GenreIsSimulation]' derivation='None' name='[none:GenreIsSimulation:nk]' pivot='key' type='nominal' />
+      <column-instance column='[GenreIsSports]' derivation='None' name='[none:GenreIsSports:nk]' pivot='key' type='nominal' />
+      <column-instance column='[GenreIsStrategy]' derivation='None' name='[none:GenreIsStrategy:nk]' pivot='key' type='nominal' />
       <column-instance column='[IsFree]' derivation='None' name='[none:IsFree:nk]' pivot='key' type='nominal' />
       <column-instance column='[PriceFinal]' derivation='None' name='[none:PriceFinal:ok]' pivot='key' type='ordinal' />
       <column-instance column='[ReleaseDate]' derivation='Year' name='[yr:ReleaseDate:ok]' pivot='key' type='ordinal' />
+      <group hidden='true' name='[Inclusions (Genre Is Action,Genre Is Adventure,Genre Is Casual,Genre Is Early Access,Genre Is Free To Play,Genre Is Indie,Genre Is Massively Multiplayer,Genre Is Non Game,Genre Is Racing,Genre Is RPG,Genre Is Simulation,Genre Is Sports,Genre Is Strategy)]' name-style='unqualified' user:auto-column='include'>
+        <groupfilter function='crossjoin'>
+          <groupfilter function='level-members' level='[none:GenreIsAction:nk]' />
+          <groupfilter function='level-members' level='[none:GenreIsAdventure:nk]' />
+          <groupfilter function='level-members' level='[none:GenreIsCasual:nk]' />
+          <groupfilter function='level-members' level='[none:GenreIsEarlyAccess:nk]' />
+          <groupfilter function='level-members' level='[none:GenreIsFreeToPlay:nk]' />
+          <groupfilter function='level-members' level='[none:GenreIsIndie:nk]' />
+          <groupfilter function='level-members' level='[none:GenreIsMassivelyMultiplayer:nk]' />
+          <groupfilter function='level-members' level='[none:GenreIsNonGame:nk]' />
+          <groupfilter function='level-members' level='[none:GenreIsRacing:nk]' />
+          <groupfilter function='level-members' level='[none:GenreIsRPG:nk]' />
+          <groupfilter function='level-members' level='[none:GenreIsSimulation:nk]' />
+          <groupfilter function='level-members' level='[none:GenreIsSports:nk]' />
+          <groupfilter function='level-members' level='[none:GenreIsStrategy:nk]' />
+        </groupfilter>
+      </group>
       <group caption='Tooltip (Price Final,YEAR(Release Date))' hidden='true' name='[Tooltip (Price Final,YEAR(Release Date))]' name-style='unqualified' user:auto-column='sheet_link' user:ui-vit-column='true'>
         <groupfilter function='crossjoin'>
           <groupfilter function='level-members' level='[none:PriceFinal:ok]' />
@@ -1481,20 +1511,173 @@
     <worksheet name='Sheet 1'>
       <table>
         <view>
-          <datasources />
+          <datasources>
+            <datasource caption='games-features' name='federated.162krb40o6ihar17elmmt17ct6av' />
+          </datasources>
+          <datasource-dependencies datasource='federated.162krb40o6ihar17elmmt17ct6av'>
+            <column caption='Genre Is Action' datatype='boolean' name='[GenreIsAction]' role='dimension' type='nominal' />
+            <column caption='Genre Is Adventure' datatype='boolean' name='[GenreIsAdventure]' role='dimension' type='nominal' />
+            <column caption='Genre Is Casual' datatype='boolean' name='[GenreIsCasual]' role='dimension' type='nominal' />
+            <column caption='Genre Is Early Access' datatype='boolean' name='[GenreIsEarlyAccess]' role='dimension' type='nominal' />
+            <column caption='Genre Is Free To Play' datatype='boolean' name='[GenreIsFreeToPlay]' role='dimension' type='nominal' />
+            <column caption='Genre Is Indie' datatype='boolean' name='[GenreIsIndie]' role='dimension' type='nominal' />
+            <column caption='Genre Is Massively Multiplayer' datatype='boolean' name='[GenreIsMassivelyMultiplayer]' role='dimension' type='nominal' />
+            <column caption='Genre Is Non Game' datatype='boolean' name='[GenreIsNonGame]' role='dimension' type='nominal' />
+            <column caption='Genre Is RPG' datatype='boolean' name='[GenreIsRPG]' role='dimension' type='nominal' />
+            <column caption='Genre Is Racing' datatype='boolean' name='[GenreIsRacing]' role='dimension' type='nominal' />
+            <column caption='Genre Is Simulation' datatype='boolean' name='[GenreIsSimulation]' role='dimension' type='nominal' />
+            <column caption='Genre Is Sports' datatype='boolean' name='[GenreIsSports]' role='dimension' type='nominal' />
+            <column caption='Genre Is Strategy' datatype='boolean' name='[GenreIsStrategy]' role='dimension' type='nominal' />
+            <column caption='Response Name' datatype='string' name='[ResponseName]' role='dimension' type='nominal' />
+            <column-instance column='[ResponseName]' derivation='Count' name='[cnt:ResponseName:qk]' pivot='key' type='quantitative' />
+            <column-instance column='[GenreIsAction]' derivation='None' name='[none:GenreIsAction:nk]' pivot='key' type='nominal' />
+            <column-instance column='[GenreIsAdventure]' derivation='None' name='[none:GenreIsAdventure:nk]' pivot='key' type='nominal' />
+            <column-instance column='[GenreIsCasual]' derivation='None' name='[none:GenreIsCasual:nk]' pivot='key' type='nominal' />
+            <column-instance column='[GenreIsEarlyAccess]' derivation='None' name='[none:GenreIsEarlyAccess:nk]' pivot='key' type='nominal' />
+            <column-instance column='[GenreIsFreeToPlay]' derivation='None' name='[none:GenreIsFreeToPlay:nk]' pivot='key' type='nominal' />
+            <column-instance column='[GenreIsIndie]' derivation='None' name='[none:GenreIsIndie:nk]' pivot='key' type='nominal' />
+            <column-instance column='[GenreIsMassivelyMultiplayer]' derivation='None' name='[none:GenreIsMassivelyMultiplayer:nk]' pivot='key' type='nominal' />
+            <column-instance column='[GenreIsNonGame]' derivation='None' name='[none:GenreIsNonGame:nk]' pivot='key' type='nominal' />
+            <column-instance column='[GenreIsRPG]' derivation='None' name='[none:GenreIsRPG:nk]' pivot='key' type='nominal' />
+            <column-instance column='[GenreIsRacing]' derivation='None' name='[none:GenreIsRacing:nk]' pivot='key' type='nominal' />
+            <column-instance column='[GenreIsSimulation]' derivation='None' name='[none:GenreIsSimulation:nk]' pivot='key' type='nominal' />
+            <column-instance column='[GenreIsSports]' derivation='None' name='[none:GenreIsSports:nk]' pivot='key' type='nominal' />
+            <column-instance column='[GenreIsStrategy]' derivation='None' name='[none:GenreIsStrategy:nk]' pivot='key' type='nominal' />
+          </datasource-dependencies>
+          <filter class='categorical' column='[federated.162krb40o6ihar17elmmt17ct6av].[Inclusions (Genre Is Action,Genre Is Adventure,Genre Is Casual,Genre Is Early Access,Genre Is Free To Play,Genre Is Indie,Genre Is Massively Multiplayer,Genre Is Non Game,Genre Is Racing,Genre Is RPG,Genre Is Simulation,Genre Is Sports,Genre Is Strategy)]'>
+            <groupfilter function='reorder-dimensionality' user:ui-domain='database' user:ui-enumeration='inclusive' user:ui-marker='enumerate'>
+              <groupfilter function='crossjoin'>
+                <groupfilter function='member' level='[none:GenreIsCasual:nk]' member='false' />
+                <groupfilter function='crossjoin'>
+                  <groupfilter function='member' level='[none:GenreIsEarlyAccess:nk]' member='false' />
+                  <groupfilter function='crossjoin'>
+                    <groupfilter function='member' level='[none:GenreIsFreeToPlay:nk]' member='false' />
+                    <groupfilter function='crossjoin'>
+                      <groupfilter function='member' level='[none:GenreIsMassivelyMultiplayer:nk]' member='false' />
+                      <groupfilter function='crossjoin'>
+                        <groupfilter function='member' level='[none:GenreIsNonGame:nk]' member='false' />
+                        <groupfilter function='crossjoin'>
+                          <groupfilter function='member' level='[none:GenreIsRPG:nk]' member='false' />
+                          <groupfilter function='crossjoin'>
+                            <groupfilter function='member' level='[none:GenreIsRacing:nk]' member='false' />
+                            <groupfilter function='crossjoin'>
+                              <groupfilter function='member' level='[none:GenreIsSimulation:nk]' member='false' />
+                              <groupfilter function='crossjoin'>
+                                <groupfilter function='member' level='[none:GenreIsSports:nk]' member='false' />
+                                <groupfilter function='union'>
+                                  <groupfilter function='crossjoin'>
+                                    <groupfilter function='member' level='[none:GenreIsAction:nk]' member='false' />
+                                    <groupfilter function='union'>
+                                      <groupfilter function='crossjoin'>
+                                        <groupfilter function='member' level='[none:GenreIsAdventure:nk]' member='false' />
+                                        <groupfilter function='crossjoin'>
+                                          <groupfilter function='member' level='[none:GenreIsIndie:nk]' member='false' />
+                                          <groupfilter function='union'>
+                                            <groupfilter function='member' level='[none:GenreIsStrategy:nk]' member='false' />
+                                            <groupfilter function='member' level='[none:GenreIsStrategy:nk]' member='true' />
+                                          </groupfilter>
+                                        </groupfilter>
+                                      </groupfilter>
+                                      <groupfilter function='crossjoin'>
+                                        <groupfilter function='member' level='[none:GenreIsAdventure:nk]' member='true' />
+                                        <groupfilter function='crossjoin'>
+                                          <groupfilter function='member' level='[none:GenreIsIndie:nk]' member='true' />
+                                          <groupfilter function='union'>
+                                            <groupfilter function='member' level='[none:GenreIsStrategy:nk]' member='false' />
+                                            <groupfilter function='member' level='[none:GenreIsStrategy:nk]' member='true' />
+                                          </groupfilter>
+                                        </groupfilter>
+                                      </groupfilter>
+                                    </groupfilter>
+                                  </groupfilter>
+                                  <groupfilter function='crossjoin'>
+                                    <groupfilter function='member' level='[none:GenreIsAction:nk]' member='true' />
+                                    <groupfilter function='union'>
+                                      <groupfilter function='crossjoin'>
+                                        <groupfilter function='member' level='[none:GenreIsAdventure:nk]' member='false' />
+                                        <groupfilter function='crossjoin'>
+                                          <groupfilter function='union'>
+                                            <groupfilter function='member' level='[none:GenreIsIndie:nk]' member='false' />
+                                            <groupfilter function='member' level='[none:GenreIsIndie:nk]' member='true' />
+                                          </groupfilter>
+                                          <groupfilter function='union'>
+                                            <groupfilter function='member' level='[none:GenreIsStrategy:nk]' member='false' />
+                                            <groupfilter function='member' level='[none:GenreIsStrategy:nk]' member='true' />
+                                          </groupfilter>
+                                        </groupfilter>
+                                      </groupfilter>
+                                      <groupfilter function='crossjoin'>
+                                        <groupfilter function='member' level='[none:GenreIsAdventure:nk]' member='true' />
+                                        <groupfilter function='crossjoin'>
+                                          <groupfilter function='member' level='[none:GenreIsIndie:nk]' member='true' />
+                                          <groupfilter function='union'>
+                                            <groupfilter function='member' level='[none:GenreIsStrategy:nk]' member='false' />
+                                            <groupfilter function='member' level='[none:GenreIsStrategy:nk]' member='true' />
+                                          </groupfilter>
+                                        </groupfilter>
+                                      </groupfilter>
+                                    </groupfilter>
+                                  </groupfilter>
+                                </groupfilter>
+                              </groupfilter>
+                            </groupfilter>
+                          </groupfilter>
+                        </groupfilter>
+                      </groupfilter>
+                    </groupfilter>
+                  </groupfilter>
+                </groupfilter>
+              </groupfilter>
+              <order>
+                <hierarchy name='[none:GenreIsAction:nk]' />
+                <hierarchy name='[none:GenreIsAdventure:nk]' />
+                <hierarchy name='[none:GenreIsCasual:nk]' />
+                <hierarchy name='[none:GenreIsEarlyAccess:nk]' />
+                <hierarchy name='[none:GenreIsFreeToPlay:nk]' />
+                <hierarchy name='[none:GenreIsIndie:nk]' />
+                <hierarchy name='[none:GenreIsMassivelyMultiplayer:nk]' />
+                <hierarchy name='[none:GenreIsNonGame:nk]' />
+                <hierarchy name='[none:GenreIsRacing:nk]' />
+                <hierarchy name='[none:GenreIsRPG:nk]' />
+                <hierarchy name='[none:GenreIsSimulation:nk]' />
+                <hierarchy name='[none:GenreIsSports:nk]' />
+                <hierarchy name='[none:GenreIsStrategy:nk]' />
+              </order>
+            </groupfilter>
+          </filter>
+          <filter class='categorical' column='[federated.162krb40o6ihar17elmmt17ct6av].[none:GenreIsSports:nk]'>
+            <groupfilter function='member' level='[none:GenreIsSports:nk]' member='false' user:ui-domain='relevant' user:ui-enumeration='inclusive' user:ui-marker='enumerate' />
+          </filter>
+          <slices>
+            <column>[federated.162krb40o6ihar17elmmt17ct6av].[none:GenreIsSports:nk]</column>
+            <column>[federated.162krb40o6ihar17elmmt17ct6av].[Inclusions (Genre Is Action,Genre Is Adventure,Genre Is Casual,Genre Is Early Access,Genre Is Free To Play,Genre Is Indie,Genre Is Massively Multiplayer,Genre Is Non Game,Genre Is Racing,Genre Is RPG,Genre Is Simulation,Genre Is Sports,Genre Is Strategy)]</column>
+          </slices>
           <aggregation value='true' />
         </view>
-        <style />
+        <style>
+          <style-rule element='header'>
+            <format attr='height-header' value='200' />
+          </style-rule>
+        </style>
         <panes>
           <pane selection-relaxation-option='selection-relaxation-allow'>
             <view>
               <breakdown value='auto' />
             </view>
             <mark class='Automatic' />
+            <encodings>
+              <text column='[federated.162krb40o6ihar17elmmt17ct6av].[cnt:ResponseName:qk]' />
+            </encodings>
+            <style>
+              <style-rule element='mark'>
+                <format attr='mark-labels-cull' value='true' />
+                <format attr='mark-labels-show' value='true' />
+              </style-rule>
+            </style>
           </pane>
         </panes>
-        <rows />
-        <cols />
+        <rows>([federated.162krb40o6ihar17elmmt17ct6av].[none:GenreIsAction:nk] / ([federated.162krb40o6ihar17elmmt17ct6av].[none:GenreIsAdventure:nk] / ([federated.162krb40o6ihar17elmmt17ct6av].[none:GenreIsCasual:nk] / ([federated.162krb40o6ihar17elmmt17ct6av].[none:GenreIsEarlyAccess:nk] / ([federated.162krb40o6ihar17elmmt17ct6av].[none:GenreIsFreeToPlay:nk] / ([federated.162krb40o6ihar17elmmt17ct6av].[none:GenreIsIndie:nk] / ([federated.162krb40o6ihar17elmmt17ct6av].[none:GenreIsMassivelyMultiplayer:nk] / ([federated.162krb40o6ihar17elmmt17ct6av].[none:GenreIsNonGame:nk] / ([federated.162krb40o6ihar17elmmt17ct6av].[none:GenreIsRacing:nk] / ([federated.162krb40o6ihar17elmmt17ct6av].[none:GenreIsRPG:nk] / ([federated.162krb40o6ihar17elmmt17ct6av].[none:GenreIsSimulation:nk] / ([federated.162krb40o6ihar17elmmt17ct6av].[none:GenreIsSports:nk] / [federated.162krb40o6ihar17elmmt17ct6av].[none:GenreIsStrategy:nk]))))))))))))</rows>
+        <cols>[federated.162krb40o6ihar17elmmt17ct6av].[cnt:ResponseName:qk]</cols>
       </table>
       <simple-id uuid='{FB380FC1-5E10-4293-AE40-846638843409}' />
     </worksheet>
@@ -1818,7 +2001,7 @@
     </worksheet>
   </worksheets>
   <windows saved-dpi-scale-factor='1.25' source-height='37'>
-    <window class='worksheet' name='Sheet 1'>
+    <window class='worksheet' maximized='true' name='Sheet 1'>
       <cards>
         <edge name='left'>
           <strip size='160'>
@@ -1839,9 +2022,18 @@
           </strip>
         </edge>
       </cards>
+      <viewpoint>
+        <highlight>
+          <color-one-way>
+            <field>[federated.162krb40o6ihar17elmmt17ct6av].[none:GenreIsAction:nk]</field>
+            <field>[federated.162krb40o6ihar17elmmt17ct6av].[none:GenreIsAdventure:nk]</field>
+            <field>[federated.162krb40o6ihar17elmmt17ct6av].[none:ResponseName:nk]</field>
+          </color-one-way>
+        </highlight>
+      </viewpoint>
       <simple-id uuid='{7296D582-944D-452F-9D03-1A09999582C2}' />
     </window>
-    <window class='worksheet' maximized='true' name='Avg Age per Genre'>
+    <window class='worksheet' name='Avg Age per Genre'>
       <cards>
         <edge name='left'>
           <strip size='160'>
@@ -2386,17 +2578,117 @@
     </thumbnail>
     <thumbnail height='192' name='Sheet 1' width='192'>
       iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAYAAABS3GwHAAAACXBIWXMAABJ0AAASdAHeZh94
-      AAACFUlEQVR4nO3TMQEAIAzAMMC/5yFjRxMFfXpnZg5Eve0A2GQA0gxAmgFIMwBpBiDNAKQZ
-      gDQDkGYA0gxAmgFIMwBpBiDNAKQZgDQDkGYA0gxAmgFIMwBpBiDNAKQZgDQDkGYA0gxAmgFI
-      MwBpBiDNAKQZgDQDkGYA0gxAmgFIMwBpBiDNAKQZgDQDkGYA0gxAmgFIMwBpBiDNAKQZgDQD
-      kGYA0gxAmgFIMwBpBiDNAKQZgDQDkGYA0gxAmgFIMwBpBiDNAKQZgDQDkGYA0gxAmgFIMwBp
-      BiDNAKQZgDQDkGYA0gxAmgFIMwBpBiDNAKQZgDQDkGYA0gxAmgFIMwBpBiDNAKQZgDQDkGYA
-      0gxAmgFIMwBpBiDNAKQZgDQDkGYA0gxAmgFIMwBpBiDNAKQZgDQDkGYA0gxAmgFIMwBpBiDN
-      AKQZgDQDkGYA0gxAmgFIMwBpBiDNAKQZgDQDkGYA0gxAmgFIMwBpBiDNAKQZgDQDkGYA0gxA
-      mgFIMwBpBiDNAKQZgDQDkGYA0gxAmgFIMwBpBiDNAKQZgDQDkGYA0gxAmgFIMwBpBiDNAKQZ
-      gDQDkGYA0gxAmgFIMwBpBiDNAKQZgDQDkGYA0gxAmgFIMwBpBiDNAKQZgDQDkGYA0gxAmgFI
-      MwBpBiDNAKQZgDQDkGYA0gxAmgFIMwBpBiDNAKQZgDQDkGYA0gxAmgFIMwBpBiDNAKR9Y+0F
-      fBUOM1sAAAAASUVORK5CYII=
+      AAAXIklEQVR4nO3dWXcbV3ru8X8VgMI8keA8iZosyZFlmbakbp9evMwnyE3u+3v4e/RtcpWc
+      lRUn53Q6J92WZEWSNVDiPIgzwQEACWIuoABUnQtKlBRLttwuWfTa7++Oa69V9QLgU3vvqtpV
+      muM4DkIoSv/QBQjxIUkAhNIkAEJpEgChNAmAUJoEQChNAiCUJgEQSpMACKVJAITSJABCaRIA
+      oTQJgFCaBEAoTQIglCYBEEqTAAilSQCE0iQAQmkSAKE0CYBQmgRAKE0CIJQmARBKkwAIpUkA
+      hNIkAEJpEgChNAmAUJoEQChNAiCUJgEQSpMACKVJAITSJABCaRIAoTQJgFCaBEAoTQIglCYB
+      EEqTAAilSQCE0iQAQmkSAKE0CYBQmgRAKE0CIJQmARBKkwAIpUkAhNIkAEJpEgChNAmAUJoE
+      QChNAiCUJgEQSpMACKVJAITSJABCaRIAoTQJgFCaBEAoTQIglCYBEEqTAAilSQCE0iQAQmkS
+      AKE0CYBQmgRAKE0CIJQmARBKkwAIpUkAhNIkAEJpEgChNAmAUJoEQChNAiCUJgEQSpMACKVJ
+      AITSJABCaRIAoTTvq38UCgUsy/pQtQjxi9Mcx3E+dBFCfCjetzWkl6dZ2c7jjXRy4+rHeHTt
+      uG17Z5uB/oH3XtzK7CPS+1WCHf1cu3zutbZfpAa7zezkA/ZLFom+Ua6cHz5uctpNdnN5+nt7
+      3m8NrToTE48pmy16Tl3gwsjL/dlWlUzJoi+VfL81NMrce/QUq2Uz/NGnjPbGX5ZXO2S/4ac3
+      GXq/NZh5bn43haZpnPvkOv3JwHFTs5ThUOugO+r7yZt9awBWdguMj48DYLca7O5m0f0xulNx
+      VlZWGOjrI5/LULe99HSnaJllcocVUj09BHyev+ITfl86bx7X0LJMstl9jEiSzkTkeQ29ZPf2
+      sL0hulMJ6uVD8mWLnr4efK8E9q9mt9g39eMamvUKmdwh4USKuN9hdWOTvu5O9nZ28YTidCWj
+      VAr7lOrQ29uFx4USaNYo6wnGxz8GoF4tksuXiHd2E2yVWdsu0R0PktnL4Y910BkLUTjIULcN
+      urs6cONroF7AigwxfuUUOA7VYp58qUZndy96OctGMU5nyCGTzRPt6CIeMtjP7GIbEbqScTQ3
+      aqhm0Ho+ZvxiFzgOpXyOYq1Jd28vrcMttrQocY9J9qBEMtVN2K+T3dvDG07SGQ+/dbOer776
+      6qs3NawvTrKbzZMr1UkGNTKHVQ42FtA7T3Gwu0l3zGByaQu/TycYDjA3s4jP02YlfcBQX5cL
+      nxgWpx+SOyhSqDtEPE0OynV215eI9AyT2d6kw2sxu1PB0G0iIQ8z0yv49DrrmSoD3R0/vwC7
+      zfSTh+QPi9RsA0+zQtm0WF9dpau3l91Mjkgjy7OiB4/TIuS1WFrZw64XyFYdujuiP7+Glsmj
+      iScUC4e0fRFa1Txmo8mz1U2GumPsFBpo+TX2LANsG90qsLFXpJbfoaqH6YgGf34NjRJ3H89Q
+      KRzgCXdgFjJYzSYrGzv0xb1kGgGq6TlqBLEdsA63yVRaHGyuoCd6iPrfepx9d7V9vnm0SL2Y
+      JZTooniQwapX2cgU6fI32NdSZBYf4fGHaWteSrtrFC2N7WfzRAdOEXjLMfmtlWmBOGNjY6Dp
+      FNKLpNM5rMIuwXIDAH8kSczYIJs9oDOiM7+aZqgvSTDZ//M/7HP+aBdjY2Nous7Os0m298oU
+      81kGzCYA4VQ/gc1pMjmL7qDJ7PoOo30xEn0J12qIpPoZGxtD13WWpx6wW7LI7Of5m9ZlAOL9
+      o2gTc2QbUWJ2i2ebWXqSQXrj7g3POvpHGbt6Ed2jM/PgKQVLZzNX4jcfDwKQGhghPbfKvtWB
+      TY6N3QaxkJeY7t5Jvt6Rjxi7PIzHo/Noag1TC5ApNfhseOSofWCA+ZVdmrZGNrdKsR3ApwGO
+      G4f/I8Pn/oaxCymwLRY2N2g6GkUnxKWYAWgMDfaxnM6Q0IPklp/hBDvQALsFvGV09PZvSNMx
+      DAPD58WsVAhG44SCBjyfMjetOugGutOgosUZSgaJxKLEIu6NBTX9qAaf10OtYhKOxQm8cjSp
+      16p4/QHajRpWsIfBmJdoLEokFPiBrf40uu7BMAy8Xo1qrUEsHsd4ZYhXK1fwh8KYlRKBzgE6
+      wwaxWIxw0O9aDR6P96gGD9TMFvFYDJ/n5U9XrVQJhEJUiwVSfYOEAn7isQRBN468L2rwHtWg
+      6zZmwyYei+I9Hl851Kp1AqEA5UKRkaEhdF+AWCxBwOdeCL0+H4ZhQNuiaXuIxaKvDDNtamaT
+      YMBHsVBidHgQzQgSiyYwfuBreOtZIMuyjnYG2O0m1aqJzzDw+vzY7SY+nxezWsXWvIRDQdrN
+      BrV6A38whN/nzhf/ag3tlkW11sDwG/h8Bu1W8ygY1Sp4DEJBPy2rTq3RJBSK4PO68MU7Dlaz
+      eVzD0fZbGIYPw+ej1Wrj82pUKjU8RoCg34dVN2k024TCYbweN2qwsVptDN/RIazZMKk3bXw+
+      L36fl2bbwaM51GomvkCQgM9L3axitSEcDr928uKvZrex2mD4PDiOg1WvYbU1DJ8Hw+uh6Wjo
+      Toua2cAfDOP36tSqFdp4CIeD6G5MAuwWlq1jeHUcx6FuVmk7Hnw+Dz6PRhsvtBuYdYtgKHJ0
+      sKhUcHQf4VDwrfMQOQ0qlCZXgoXSJABCaRIAoTQJgFCaBEAoTQIglCYBEEpz71KhS2zb/tAl
+      CIWcuAAUi0Xa7faHLkMoQq4EC6W99XboD61ezHDv/j3+8s09StU6Xf0DGL/0jKXd4N/+9X+z
+      lz2gaOn0dr5cCGJbNe4+nmR4wL27X9/IzPNPX/9f9nM56lqQVCJy3NQs7fFgcYehns73W0Np
+      i3/4+iaH+xmcQJJk5OXNhvXsEhPbLQY6Iz+wgZ9vdfYR/33nNk8Xt9CMMF1JF2415wQOgV4I
+      xHv43f/6Es03z2++HKOwt8XaToZmuBujmefCpU9ZWZpm4NQ5VmcmyJcbnLlyncEOF1cmORDr
+      OcX4b68DkNtcYnZ1h0C8h7FLIziOg5nf4u6TZUIdvXzx8SlmJ59QqLb46Oo1euPu3JXaPXKB
+      8c+PFsSkn02xvJ0n2jXMJ0MhHAcOd5Z5spAm3jPMldOdPH06TaWpc+XzL0iGfvoqqe9xYOj8
+      leMFMcszD0nvV0kNneNsxMHBYXd1hoX1fbpGznG+2+DR5AIWAa5d/4yQCwukTn/8OZFwkLze
+      x4XhKEvTM+QrRYYGB6hpEUaTOot7VYaiDpML62jBJL/54jI/tudfzVkgq5qnbnRx5fwQpWIR
+      B6iUilT215lby2PbLRYWllzfb2FvjVu3bjG7uoPXMPDqGhtri5jNo5GjVSniBBKcGuyjlF1h
+      OV2gZVVZWl5zrYbM+gK3bt1iZfsAnz+ArsHC0sJxu1ku4I10MtTfRXptgb3DGlYpy2o651oN
+      m4uT3Lp1i/RBFf+LGhYXj9srpSKhZA8D3UkWZqep1JvUcmts7Juu1fCSw+5ulgtXviDua1Ix
+      LZy2RbFSY+rpE5ptm/zGHJnKj2/pxPYA3+MJ0t/Tia5pOI5Nu9WgVKkxqPvoO3WOLz87Te35
+      Qhk3JXpHn/cAbe7fvstn16/TunObF1Mnf8cINzocHtx7xMUL/QycucgXlwYwG+6dzeo59aIH
+      aPLtzXmu/+YapW/uvKyx/zxX+9rcv/+IsyMJTl38lAsDUSzbnaWpAMMfHfUAjtPg25ky16+P
+      8edvHx6395++TK/d4LuHE/RGDT66+in9IWh5XViR9gbxji6iIYN6WaPVbmNWKlgth3AgysXP
+      f0vYqaO/Qwd8YucAL9gOJBIxcGwMfwi/4cWvNZmaWyWS7GJo+DSU08wubRBL9RIJGq7vP5mI
+      Axpex2R2aZN4KkVPKoWma0T9GpOTM0R6hjkzeop6bo2F1W0SqR7CAReGHzjYeEjGI4AOjQKL
+      61k6urro7eoEjw+/YzI9s0hq5CxnTw2zvz7PSvqATtfWZzvYup9kNAh4sMp7rO2V6epO0d2R
+      BF8Ivb7PzMIaA2cvcP7MEKuzT9nMVejp7cFwY10E4Ng2Xn+YcNCLbWtEYxF8gSC5tQVyVYee
+      3h7OjvQy9/QJ+1Wb3p7Uj67LlrNAQmm/mjmAEO+DBEAoTQIglCYBEEqTAAilSQCE0iQAQmkS
+      AKG0E/eCDMdx+NDX5nQXn6kpTrYTdyXYNM0PHoBgMIjmyjO9xUn3xpvhmrUCjyeeUqo2MAIR
+      Pr1xg4TfvRur3tWfv/5HVjM1EsOX+Lu//fK1tomnE3z26WfvtwC7xZMH/02pwRtekGGxvp1h
+      dHjo/dbQrHHvuwdYbe17L8ho18ukD+uMuPQ4+reqF7h5/wmapn//BRmVHDtmgOEud+7Pf6tq
+      lj/dmyHg83zvBRnWYZqs1s1g4qffB/bGvt4XSnDjy3GiwTC/Hf+SsGZRKhRY29yhdLhPsw3V
+      Uh6zaVM+2GVmdhGz6f4yxtWKxu9//3v+7m+/pF7KcfO//sTTpTQOMDs/C7bF4zt/4e7EPC3b
+      IbM2x399c5day6UexG5TsgOMj49z5fww9XKemelpdvZLOO0W27t7OO0GS7PTrKazOI7D/vY6
+      80trNN26GbRVxwp0MT4+zoWRHiqHGaanpskVa9hWle3sIa1GlfmZabYyh+DY7K4/Y2ktTdut
+      jrRRRkuOMj4+zmhPjMNsmqmpGQo1i1Y1z+5hlUa1wOz0NHv5CjhtNp7Ns5rOYLtVg3lAYOAy
+      4+Pj9CcMcttrTM/MU220aZb2yJRa1Io5pqdnOCib2G2LlYVZNjP5H9zsOw12zcout249JhCJ
+      sv5slmoTdjcWyZcLTM5tEg3YPHwy58rnfFV5a44//OEPfH3zIbVKhViqj5Xv/sh2+ehbzc3f
+      Y7nqJxnx0aju8pe7i6SCdf7lj7ddq+HV9QCmaRKNx1mee4rZOmo/WJnk0JPA0B2qhR1Wd0p4
+      m4dMLW64VsOr6wFqZoN4IsbU5NPj9vTiJM1AB7rT4mBnlb1yG+tgk6X0vms1vLoeoF63SCbC
+      PH0yedy+PDeFEeuEtkV6eZayEyC/Nke6UHOthmdTD7h16xa5skW9BbGgzuTMi3URDjPT0yQ6
+      Omk3m6zNT9E0IqSnH7LfePs233E9gIfzly7T1xHltSUW1X02MgX8AZ3uLvff1xUdusTv//7v
+      AYfHf/5XFvMt9nZ3uVg9+kSdZ6/SvfUtT55kidkdPFraxudvM3ruims1vFwPYDPz8B5VDPYP
+      C7TaR4f4jpGLpGcWWcnD+W6dnf0SWipM91DMtRpergdo8/jOFG1/hGz+8Li9b/QjDhfXWMv7
+      6DbK5A41khGDwbB79+K/XA/Q4v70Mt5IkoNiATj6nCOnz7G0lubQG4HiLpa/jj8QIexz45bw
+      I+c+ucb4xS6aZonv1tcw/AHypgYpH6Bx7uwZVrY28UZ6KKa38Xc6GIlOfmhg9IM9wPFEUNOO
+      z4yEAl6+u3OTmeVtiAwwGGlSqdVou9bXvbL/47MxDpZZpVSsgqahPa+ttL/H9l6GfLEIqUtc
+      TNY4LJZAc2m+ovHaZLhp1THNOvbzSbqmaZTz+xQrVao1k0j3MGGnSq1mutf1H5XxnEOjUade
+      b/DiPIGmQeEgR6lapVar0zs0gl0vUzMbuFaCxivP13eomyb1hoXjaMe/R34/S7lao1a3OHv2
+      FKVCAdO0Xi3+ZxehvdiYY1OvmTSsJi8/pM1+Nku1WsVsWJw/e4rDwyI1s4n2A//lchboDeQs
+      kDrkhLdQmgRAKE0CIJQmARBKkwAIpUkAhNIkAEJpEgChtF/PoxGFchqNBsVi8b3uQ64Ev4Fc
+      CVaH9ADiV2F19hEbmSI2On2nPuLSaXfeyyA9wBtID3AyZddnn78fIEG5VKVRK+ALJdC8BhED
+      SmaLWNDLxvo6wWQ/vZ0/vkhHJsHiV6jFxJ3bbOUbtEs7rGwf0K4dMreaZnVhhpYnyOr0Qwrv
+      sLxdAiB+laKpIS5fPIvhff1feGN9jcxuGj0YwfMOAwkJgPhV0nUNTQMjFGF3eYq7DyaoNmzO
+      jo5QMy0cR0d/h2UhMgd4A5kDnEzO8UIkcGxA19AcB9u2cdDQ9KMlM0fvmj5axPVjP6OcBRK/
+      Gq8elI5XeWkauuf1Q73H8+4rAmUIJJQmARBKkwAIpUkAhNIkAEJpEgChNAmAUNqJuw7QarWe
+      X8j4cDwej1wIU8SJCwDwwa8Em6b5Qfcvfjkn7laIF5x2i7rVfP6Xhj8QQP+lD8qOg2U1aNsO
+      useL3/C90uTQbtt4ve/5vQmOTaPRwHbA4/Vh+F4esxzHpm07eH/Clc+/toZ6/ehZo16fge+V
+      z+zYbdqOhtfzfkfTTatO6/nz3v/n9/BznNg5gFUrMDP5iH/+56+Znluk8SFGRW2L//yP/8PU
+      1BSr2689FxunaXL/8cT7r6Fe4N//4/8xNTVFOlt4ralVzvJgZuX911Da5l/+dJOpqSkyh68/
+      7ryRW+bxSva9l7C78Yw7f/kjf/rmHht7P/zM/5/iRA6BAPzRFF98PkajHWJs7Ar5nXXmNrfR
+      kkN4alk+vvI5z+aeMHT6As+mHlGsNhi5fIPR7oirdUS7Brl27RoAe2vzzG/s4Qt1cu3KWQBq
+      uTW+fbpGJNnNtcujTE48plxrce7qDQY7Qq7UkBo8w7WxSwBsLDxhbbdAINnP2OmjN7UcbM0z
+      sbhHvGeQq6dTPH4yTc2CT65dJxXxu1JD/+hFrn0yAsDS5H128ibxvtNcTB61by09YWmrQGro
+      LBe6fXw3tYTV9nLjy+tEjJ/fQw2fu0zAp5PX+zg3FGVuYoKDaoXR4UHKRDjXqTOzXWEk2mbq
+      WRrbG+V3v/0M74+MGk5sD/A/tcwSnuQon300TK1WBcCsVakerPFsuwK6h831Vdf3W9hb5/bt
+      28yv7eLz+/HqOjvba9Stoy6pbTXwheIMDvRSzKywmTWBNpubW67VkFlf4Pbt26zu5DH8AXRd
+      Z3Xt5ZG/ZVkEokkGe7vYWl8kX7awrTJbLh4pN5cmuX37NtsH1Zc1rL5aQ5NwIkVfd4K5+Vma
+      rTZ2JcN2/n3Mpxz2D0qM3fiShL9N3Wrh2C1q9QbTMzM4QP1gnVz1x7d0YnuA7/EE6I4dvYzB
+      sW1azTr5QoWh4QG6+4f53bVzlCvuv+Ey0Xvq+Qsy2ty/fZex69e4e+vm8WPpPZEevvjUYOL+
+      A85/1E/P0GmuXx6mWm+5VsPLF2Q0+fbmPNdvjHH45zvH7eHOIa72ePnu/gRnhxP0nxvm48E4
+      ddu9n3f4/IsXZNS5M2ty7fMr/Oe3j47bOwfO0uXVePBokr6on5EznzAUhpbXvZd0vCqW7MTv
+      81DXNJqtFpVihbqlEQtEGLp6g6hTQ3+HXXu++uqrr95LhS7RPV5isQi6pmEEgvh9HiIGTM6u
+      0jUwSP/AKQwrx/TCOh29A4T9bmb66FbbeCwKaAS9LWYWNugdHKKrI4nh8xENeZl+Okms/zSj
+      IyM4pW3mltOkevsJGi7UooHuMYhHQ4COz66ysJZjYGiAVEcSr89PULeYnp6j5/RFTo8MU9pZ
+      5lk6T09fL343Jumahu4LEA8HAA+2uc/qXo2RoT46kkm8/iDeZpHp2WeMXLjMmTMjbC9MsrVv
+      0t/Xjdfj0tkLTccfDBHy+9A0D+FoGCMYobC1xEHdy+BAL2dOD/JsaoL9uof+no4fPXFyYs8C
+      CfFL+NXMAYR4HyQAQmkSAKE0CYBQmgRAKE0CIJQmARBKkwAIpb12qbJQKGBZ7t9OIMRJJVeC
+      hdJkCCSUJgEQSpMACKVJAITSJABCaRIAoTQJgFCaBEAoTQIglCYBEEqTAAilSQCE0iQAQmkS
+      AKE0CYBQmgRAKE0CIJQmARBKkwAIpUkAhNIkAEJpEgChNAmAUNr/Bz2VrHidZS4rAAAAAElF
+      TkSuQmCC
     </thumbnail>
     <thumbnail height='192' name='Sheet 3' width='192'>
       iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAYAAABS3GwHAAAACXBIWXMAABJ0AAASdAHeZh94
