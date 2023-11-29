@@ -3,13 +3,14 @@ library(forecast)
 library(car)
 library(leaps)
 library(caret)
+library(openxlsx)
 
 steam <- read_csv(file.choose())
 
 View(steam)
 summary(steam)
 
-View(subset(steam, QueryName != ResponseName))
+# View(subset(steam, QueryName != ResponseName))
 
 #check for duplicate rows
 count(steam) - count(unique(steam))
@@ -20,7 +21,7 @@ steam <- unique(steam)
 
 table(steam$RequiredAge)
 
-view(subset(steam, RequiredAge == 0))
+# view(subset(steam, RequiredAge == 0))
 
 #there are too many falsely age required 0 games listed, after a quick look at the data using tableau regardless of the genre the average required age seems to be 17
 # so modifying the data so that required age matches the avg
@@ -56,7 +57,7 @@ x_nosec <- select(steam_test ,c(ResponseName, names(steam_test[,grepl("Genre", n
 
 count(steam) - count(subset(x_nosec, NoGenres == 0))
 
-view(subset(x_nosec, NoGenres == 0))
+# view(subset(x_nosec, NoGenres == 0))
 
 # NoGenres and NoGame genres need to be removed
 count(steam_test) - count(steam_test[steam_test$GenreIsNonGame == TRUE | steam_test$NoGenres > 0,])
@@ -80,12 +81,12 @@ for (colName in names(steam[,grepl("Genre", names(steam))])) {
 view(steam_test)
 
 
-view(select(steam[rowSums(steam_binary_conv_df) == 7,],c(ResponseName, names(steam[,grepl("Genre", names(steam))]))))
+# view(select(steam[rowSums(steam_binary_conv_df) == 7,],c(ResponseName, names(steam[,grepl("Genre", names(steam))]))))
 
 max(rowSums(steam_binary_conv_df))
 
 
-view(steam[steam$GenreIsNonGame,])
+# view(steam[steam$GenreIsNonGame,])
 
 
 max(steam$DLCCount)
@@ -95,7 +96,7 @@ max(steam$DLCCount)
 
 table(steam$PriceCurrency)
 
-view(steam_test)
+# view(steam_test)
 
 
 # Category Setup
@@ -103,7 +104,7 @@ view(steam_test)
 
 steam_binary_conv_df <- steam_test[,grepl("Category", names(steam_test))] * 1
 
-view(steam_binary_conv_df)
+# view(steam_binary_conv_df)
 
 steam_test$NoCategory <- ifelse(rowSums(steam_binary_conv_df) == 0, 1, 0) # 1 means content has no recorded genre
 
@@ -111,7 +112,7 @@ x_nosec <- select(steam_test ,c(ResponseName, names(steam_test[,grepl("Category"
 
 count(steam_test) - count(subset(x_nosec, NoCategory == 0))
 
-view(subset(steam_test, NoCategory == 1))
+# view(subset(steam_test, NoCategory == 1))
 
 
 for (colName in names(steam[,grepl("Category", names(steam))])) {
@@ -123,7 +124,7 @@ for (colName in names(steam[,grepl("Category", names(steam))])) {
   steam_test[,newColName] <- steam_test[,colName]*1
 }
 
-view(steam_test[,grepl("Category", names(steam_test))])
+# view(steam_test[,grepl("Category", names(steam_test))])
 
 help("select_if")
 
@@ -145,11 +146,11 @@ for (colName in names(select_if(steam_test, is.logical))) {
 }
 
 
-view(steam_test[,names(select_if(steam_test, is.logical))])
+# view(steam_test[,names(select_if(steam_test, is.logical))])
 view(steam_test[1:50, names(select_if(steam_test, is.numeric))])
 
 
-view(steam_test[!complete.cases(steam_test),])
+# view(steam_test[!complete.cases(steam_test),])
 
 !complete.cases(steam_test)
 
@@ -157,9 +158,28 @@ names(which(colSums(is.na(steam_test)) > 0))
 
 steam_test[is.na(steam_test$QueryName), ]
 
+steam_test[is.na(steam_test$QueryName), "QueryName"] <- steam_test[is.na(steam_test$QueryName), "ResponseName"] 
+
+steam_test[steam_test$QueryID == 8780, ]
+
 steam_test[is.na(steam_test$ReleaseDate), ]
 
+write.xlsx(steam_test[is.na(steam_test$ReleaseDate), 1:4], 'games_wo_release.xlsx')
+
+
 steam_test[is.na(steam_test$PriceCurrency), ]
+
+table(steam_test$PriceCurrency)
+
+steam_test[is.na(steam_test$PriceCurrency), "PriceCurrency"] <- "USD"
+
+steam_test[is.na(steam_test$SupportedLanguages), ]
+
+steam$app
+
+table(steam_test$SupportedLanguages)
+
+steam_test[is.na(steam_test$SupportedLanguages), "SupportedLanguages"] <- "English"
 
 steam_test[is.na(steam_test$SupportedLanguages), ]
 
@@ -167,3 +187,4 @@ view(steam_test[is.na(steam_test$Reviews), ])
 
 xyz <- steam_test %>% mutate(num_genes=str_count(SupportedLanguages," ")+1)
 view(select(xyz, c(num_genes, SupportedLanguages)))
+
