@@ -4,6 +4,7 @@ library(car)
 library(leaps)
 library(caret)
 library(openxlsx)
+library(readxl)
 
 steam <- read_csv(file.choose())
 
@@ -11,6 +12,112 @@ View(steam)
 summary(steam)
 
 # View(subset(steam, QueryName != ResponseName))
+
+# Null investigation and ammends
+
+names(which(colSums(is.na(steam)) > 0))
+
+for (i in names(which(colSums(is.na(steam)) > 0))) {
+  print(i)
+  print(count(steam[is.na(steam[,i]), ]))
+}
+
+steam[is.na(steam$QueryName), ]
+# Take missing Query Name from Response Name, works for the same purpose
+steam[is.na(steam$QueryName), "QueryName"] <- steam[is.na(steam$QueryName), "ResponseName"] 
+
+
+# Currency Type Fix
+steam[is.na(steam$PriceCurrency), c("QueryName", "PriceCurrency")]
+
+table(steam$PriceCurrency)
+
+# All prices shown in USD so safe to asasume missing currencies are USD too
+steam[is.na(steam$PriceCurrency), "PriceCurrency"] <- "USD"
+
+
+# SupportedLanguages Fix
+steam[is.na(steam$SupportedLanguages), ]
+
+table(steam$SupportedLanguages)
+
+table(grepl('English', steam$SupportedLanguages, fixed = TRUE),  is.na(steam$SupportedLanguages))
+
+# Majority of Games support English so missing values wil be replaced with English
+steam[is.na(steam$SupportedLanguages), "SupportedLanguages"] <- "English"
+
+# Now convert it to number of supported languages
+steam[sapply(strsplit(as.character(steam$SupportedLanguages), " "), length) < 2 & nchar(steam$SupportedLanguages) > 9, c("QueryID", "SupportedLanguages")]
+steam[steam$QueryID == 11250, "SupportedLanguages"] <- "Russian English Spanish French Japanese Czech"
+steam[steam$QueryID == 11260, "SupportedLanguages"] <- "English Russian Spanish Japanese Czech"
+
+steam$SupportedLanguages <- sapply(strsplit(as.character(steam$SupportedLanguages), " "), length) 
+
+# Reviews Fix
+# Download all the reviews from steamSpy api New Reviews = Recommendations + Disapprovals
+# will replace RecommendationCount with newly generated Recommendations to stay consistent
+steam_revs <- read_excel(file.choose())[, c(1,3,4,5)] # steam_games_reviews.xlsx
+steam_revs <- steam_revs %>%
+  rename("QueryID" = "appid")
+steam_revs
+
+count(steam[is.na(steam$Reviews),])
+count(steam_revs[is.na(steam_revs$Reviews),])
+select(steam, -c(Reviews, RecommendationCount))
+
+steam <- merge(x = select(steam, -c(Reviews, RecommendationCount)), y = steam_revs,  by = "QueryID", all.x = TRUE)
+
+# remaining columns with missing values, except ReleaseDate, can be converted to is.na() columns indicating wehter the game has that information on it store page or not as it is more valuable for analysis
+
+names(which(colSums(is.na(steam)) > 0))
+
+names(which(colSums(is.na(steam)) > 0))[-1]
+
+for (colName in names(which(colSums(is.na(steam)) > 0))[-1]) {
+  steam[,colName] <- is.na(steam[,colName])
+}
+
+# check columns to see if any char description column without nulls is unnecessary for the analysis
+names(select_if(steam, is.character))
+
+# Header image exists for every game therefore unnecessary for analysis
+steam <- select(steam, -HeaderImage)
+
+# Get Games with missing release dates, manually find relese dates of all 87 (couldn't find a reliable source or api)
+# write.xlsx(steam[is.na(steam$ReleaseDate), 1:4], 'games_wo_release.xlsx')
+steam_releases <- read_excel(file.choose())[, c(1,5)] # games_missing_releases.xlsx
+
+steam_releases
+
+steam <- merge(x = steam, y = steam_releases, by = "QueryID", all.x = TRUE)
+
+steam[is.na(steam$ReleaseDate), "ReleaseDate"] <- steam[is.na(steam$ReleaseDate), "ReleaseDateNew"]
+
+steam <- select(steam, -ReleaseDateNew)
+
+# when dates get converted to date data types instead of chars there seems to be some dates formatted weirdly like fall 2016, end of the world etc. aas the number of theese is about 500 hard to manually fill them. Wait until other prep work to determine whether to drop these rows or not
+# there is enough data left at the end to drop these
+
+count(steam[is.na(steam$ReleaseDate),])
+
+steam$ReleaseDate <- as.Date(toupper(steam$ReleaseDate), format = '%b %d %Y')
+
+count(steam[is.na(steam$ReleaseDate), ] )
+
+count(steam[!is.na(steam$ReleaseDate), ] )
+
+steam <- steam[!is.na(steam$ReleaseDate), ]
+
+steam$Day <- day(steam$ReleaseDate)
+table(steam$Day)
+
+steam$Month <- month(steam$ReleaseDate)
+table(steam$Month)
+
+steam$Year <- ifelse(nchar(year(steam$ReleaseDate)) < 4, year(steam$ReleaseDate) + 2000, year(steam$ReleaseDate))
+table(steam$Year)
+
+steam <- select(steam, -ReleaseDate)
 
 #check for duplicate rows
 count(steam) - count(unique(steam))
@@ -21,173 +128,75 @@ steam <- unique(steam)
 
 table(steam$RequiredAge)
 
-# view(subset(steam, RequiredAge == 0))
-
 #there are too many falsely age required 0 games listed, after a quick look at the data using tableau regardless of the genre the average required age seems to be 17
 # so modifying the data so that required age matches the avg
 
 steam$RequiredAge <- ifelse(steam$RequiredAge == 0, 17, steam$RequiredAge)
 
-# age reclassification, <10 E, <13 E10+, <17 T, <18 M, A
+# age reclassification, <10 Everyone - 1, <13 Everyone10+ - 2, <17 Teen - 3, <18 Mature - 4, Adult - 5
 
 steam <- steam %>%
-  mutate(AgeRating = case_when(RequiredAge < 10 ~ "Everyone",
-                               RequiredAge < 13 ~ "Everyone10+",
-                               RequiredAge < 17 ~ "Teen",
-                               RequiredAge < 18 ~ "Mature",
-                               .default = "Adult")
+  mutate(AgeRating = case_when(RequiredAge < 10 ~ 1,
+                               RequiredAge < 13 ~ 2,
+                               RequiredAge < 17 ~ 3,
+                               RequiredAge < 18 ~ 4,
+                               .default = 5)
   )
 
 
 
 table(steam$AgeRating, steam$RequiredAge)
 
-
+steam <- select(steam, -RequiredAge)
 
 # Genre Setup
 
-
 steam_binary_conv_df <- steam[,grepl("Genre", names(steam))] * 1
 
-steam_test <-  steam
+steam$NoGenres <- ifelse(rowSums(steam_binary_conv_df) == 0, 1, 0) # 1 means content has no recorded genre
 
-steam_test$NoGenres <- ifelse(rowSums(steam_binary_conv_df) == 0, 1, 0) # 1 means content has no recorded genre
+count(steam) - count(subset(steam, NoGenres == 0))
 
-x_nosec <- select(steam_test ,c(ResponseName, names(steam_test[,grepl("Genre", names(steam_test))])))
+# NoGenres and NoGame genres need to be removed as these refer to content that are not video games, these don't fit within the scope of the project
+count(steam) - count(steam[steam$GenreIsNonGame == TRUE | steam$NoGenres > 0,])
 
-count(steam) - count(subset(x_nosec, NoGenres == 0))
+count(steam[-which(steam$GenreIsNonGame == TRUE | steam$NoGenres > 0),])
 
-# view(subset(x_nosec, NoGenres == 0))
+steam <- steam[-which(steam$GenreIsNonGame == TRUE | steam$NoGenres > 0),]
 
-# NoGenres and NoGame genres need to be removed
-count(steam_test) - count(steam_test[steam_test$GenreIsNonGame == TRUE | steam_test$NoGenres > 0,])
-
-
-count(steam_test[-which(steam_test$GenreIsNonGame == TRUE | steam_test$NoGenres > 0),])
-
-
-steam_test <- steam_test[-which(steam_test$GenreIsNonGame == TRUE | steam_test$NoGenres > 0),]
-
-for (colName in names(steam[,grepl("Genre", names(steam))])) {
-  
-  newColName <- paste(c(as.character(colName),"Binary"), collapse = "")
-  
-  steam_test
-  
-  steam_test[,newColName] <- steam_test[,colName]*1
-}
-
-
-view(steam_test)
-
-
-# view(select(steam[rowSums(steam_binary_conv_df) == 7,],c(ResponseName, names(steam[,grepl("Genre", names(steam))]))))
-
-max(rowSums(steam_binary_conv_df))
-
-
-# view(steam[steam$GenreIsNonGame,])
-
-
-max(steam$DLCCount)
-
-
-
-
-table(steam$PriceCurrency)
-
-# view(steam_test)
-
+# Can drop these columns as they are no longer useful
+steam <- select(steam, -c(GenreIsNonGame, NoGenres))
 
 # Category Setup
-
-
-steam_binary_conv_df <- steam_test[,grepl("Category", names(steam_test))] * 1
+steam_binary_conv_df <- steam[,grepl("Category", names(steam))] * 1
 
 # view(steam_binary_conv_df)
 
-steam_test$NoCategory <- ifelse(rowSums(steam_binary_conv_df) == 0, 1, 0) # 1 means content has no recorded genre
+steam$NoCategory <- ifelse(rowSums(steam_binary_conv_df) == 0, TRUE, FALSE)
 
-x_nosec <- select(steam_test ,c(ResponseName, names(steam_test[,grepl("Category", names(steam_test))])))
+count(steam) - count(subset(steam, NoCategory == TRUE))
 
-count(steam_test) - count(subset(x_nosec, NoCategory == 0))
-
-# view(subset(steam_test, NoCategory == 1))
-
-
-for (colName in names(steam[,grepl("Category", names(steam))])) {
-  
-  newColName <- paste(c(as.character(colName),"Binary"), collapse = "")
-  
-  steam_test
-  
-  steam_test[,newColName] <- steam_test[,colName]*1
-}
-
-# view(steam_test[,grepl("Category", names(steam_test))])
-
-help("select_if")
-
+# All boolean and binary columns
 names(select_if(steam, is.logical))
+boolean_cols = names(select_if(steam, is.logical))
 
-for (colName in names(select_if(steam_test, is.logical))) {
+names(select_if(steam, is.character))
+
+names(select_if(steam, is.numeric))
+
+# drop "QueryID", "ResponseID", "QueryName", "ResponseName", "PriceCurrency" as these don't add any useful info for the analysis
+# drop "SteamSpyPlayersVariance", "SteamSpyOwnersVariance" as well as we will neglect the variance for this project for simplicity
+steam <- select(steam, -c("QueryID", "ResponseID", "QueryName", "ResponseName", "PriceCurrency", "SteamSpyPlayersVariance", "SteamSpyOwnersVariance"))
+
+# Export csv for analysis using tableau
+#write.csv(steam, 'steam_games_cleaned.csv', row.names = FALSE)
+
+
+# Convert boolean columns to binary for regression
+for (colName in boolean_cols) {
+  print(colName)
   
-  if (paste(c(as.character(colName),"Binary"), collapse = "") %in% names(steam_test)) {
-  }
-  else {
-    print(colName)
-    newColName <- paste(c(as.character(colName),"Binary"), collapse = "")
-    
-    steam_test
-    
-    steam_test[,newColName] <- steam_test[,colName]*1
-    
-  }
+  steam[,colName] <- steam[,colName]*1
 }
 
-
-# view(steam_test[,names(select_if(steam_test, is.logical))])
-view(steam_test[1:50, names(select_if(steam_test, is.numeric))])
-
-
-# view(steam_test[!complete.cases(steam_test),])
-
-!complete.cases(steam_test)
-
-names(which(colSums(is.na(steam_test)) > 0))
-
-steam_test[is.na(steam_test$QueryName), ]
-
-steam_test[is.na(steam_test$QueryName), "QueryName"] <- steam_test[is.na(steam_test$QueryName), "ResponseName"] 
-
-steam_test[steam_test$QueryID == 8780, ]
-
-steam_test[is.na(steam_test$ReleaseDate), ]
-
-write.xlsx(steam_test[is.na(steam_test$ReleaseDate), 1:4], 'games_wo_release.xlsx')
-
-
-steam_test[is.na(steam_test$PriceCurrency), ]
-
-table(steam_test$PriceCurrency)
-
-steam_test[is.na(steam_test$PriceCurrency), "PriceCurrency"] <- "USD"
-
-steam_test[is.na(steam_test$SupportedLanguages), ]
-
-steam$app
-
-table(steam_test$SupportedLanguages)
-
-steam_test[is.na(steam_test$SupportedLanguages), "SupportedLanguages"] <- "English"
-
-steam_test[is.na(steam_test$SupportedLanguages), ]
-
-view(steam_test[is.na(steam_test$Reviews), ])
-
-xyz <- steam_test %>% mutate(num_genes=str_count(SupportedLanguages," ")+1)
-view(select(xyz, c(num_genes, SupportedLanguages)))
-
-
-table(steam_test$RecommendationCount)
 
