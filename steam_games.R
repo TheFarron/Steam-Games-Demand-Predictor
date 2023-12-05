@@ -9,7 +9,7 @@ library(GGally)
 
 steam <- read_csv(file.choose())
 
-View(steam)ZZZZZZZZZ
+View(steam)
 summary(steam)
 
 # View(subset(steam, QueryName != ResponseName))
