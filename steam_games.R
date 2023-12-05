@@ -5,10 +5,11 @@ library(leaps)
 library(caret)
 library(openxlsx)
 library(readxl)
+library(GGally)
 
 steam <- read_csv(file.choose())
 
-View(steam)
+View(steam)ZZZZZZZZZ
 summary(steam)
 
 # View(subset(steam, QueryName != ResponseName))
@@ -199,4 +200,105 @@ for (colName in boolean_cols) {
   steam[,colName] <- steam[,colName]*1
 }
 
+# Export csv for analysis using tableau
+#write.csv(steam, 'steam_games_cleaned_bin.csv', row.names = FALSE)
+
+
+
+# Analysis and Predictions
+
+
+set.seed(123)
+
+# Demand Predictions
+
+steam_owner <- select(steam, -SteamSpyPlayersEstimate)
+
+view(cor(steam_owner))
+
+steam_owner_split <- createDataPartition(steam_owner$SteamSpyOwners,p=0.6,list=FALSE)
+steam_owner.train.df  <- steam_owner[steam_owner_split,]
+trdf <- subset(steam_owner.train.df, steam_owner.train.df$SteamSpyOwners>0)
+steam_owner.test.df   <- steam_owner[-steam_owner_split,]
+tdf <- subset(steam_owner.test.df, steam_owner.test.df$SteamSpyOwners>0)
+
+
+steam_owner.lm_1 <- lm(SteamSpyOwners ~.-Recommendations-Website-PCMinReqsText-PCRecReqsText-LinuxMinReqsText-LinuxRecReqsText-MacMinReqsText-MacRecReqsText,data=steam_owner.train.df)
+summary(steam_owner.lm_1)
+owner_vif <- vif(steam_owner.lm_1)
+
+names(select(steam_owner.train.df, -c(Recommendations,Website,PCMinReqsText,PCRecReqsText,LinuxMinReqsText,LinuxRecReqsText,MacMinReqsText,MacRecReqsText))[, owner_vif>5])
+
+steam_owner.lm_1_2 <- lm(SteamSpyOwners ~.-Recommendations-Website-PCMinReqsText-PCRecReqsText-LinuxMinReqsText-LinuxRecReqsText-MacMinReqsText-MacRecReqsText-PlatformWindows-PlatformLinux-PCReqsHaveRec-LinuxReqsHaveRec-PriceInitial-SupportURL-ShortDescrip-SupportedLanguages-Disapproval-DetailedDescrip-PlatformMac-MacReqsHaveMin,data=steam_owner.train.df)
+# steam_owner.lm_1_2 <- lm(SteamSpyOwners ~.,data=steam_owner.train.df)
+
+summary(steam_owner.lm_1_2)
+vif(steam_owner.lm_1_2)
+steam_owner.lm.pred <-predict(steam_owner.lm_1_2, tdf)
+
+all.residuals <- tdf$SteamSpyOwners-steam_owner.lm.pred
+data.frame(tdf$SteamSpyOwners, steam_owner.lm.pred,all.residuals)
+accuracy(steam_owner.lm.pred,tdf$SteamSpyOwners) #accuracy measure
+all_acc <- accuracy(steam_owner.lm.pred,tdf$SteamSpyOwners) 
+all_acc
+
+# Stepwise methods
+
+owner_m1 <- train(SteamSpyOwners ~., data = steam_owner.train.df,trControl=trainControl(method='none'), method='glmStepAIC',direction='backward')
+owner_m2 <- train(SteamSpyOwners ~., data = steam_owner.train.df,trControl=trainControl(method='none'), method='glmStepAIC',direction='forward')
+owner_m3 <- train(SteamSpyOwners ~., data = steam_owner.train.df,trControl=trainControl(method='none'), method='glmStepAIC',direction='both')
+
+## choose the “optimal” model across these parameters
+##  estimate model performance from a training set
+coef(owner_m1$finalModel)
+coef(owner_m2$finalModel)
+coef(owner_m3$finalModel)
+
+#predictions
+steam_owner.lm.back.pred <- predict(owner_m1, tdf)
+steam_owner.lm.forw.pred <- predict(owner_m2, tdf)
+steam_owner.lm.both.pred <- predict(owner_m3, tdf)
+
+steam_owner.back_acc <- accuracy(steam_owner.lm.back.pred, tdf$SteamSpyOwners)
+steam_owner.forw_acc <- accuracy(steam_owner.lm.forw.pred, tdf$SteamSpyOwners)
+steam_owner.both_acc <- accuracy(steam_owner.lm.both.pred, tdf$SteamSpyOwners)
+
+comp_1 <- rbind(steam_owner.back_acc, steam_owner.forw_acc, steam_owner.both_acc,all_acc)
+rownames(comp_1) <- c("Backwards","Forward","step","all")
+comp_1
+
+
+###### EXHAUSTIVE SEARCH
+# use regsubsets() in package leaps to run an exhaustive search.
+
+names(steam_owner.train.df)
+
+
+search <- regsubsets(SteamSpyOwners ~ ., data = steam_owner.train.df,  nvmax = ncol(steam_owner.train.df), 
+                     method = "exhaustive")
+#nvmax: maximum size of subsets to examine
+
+sum <- summary(search)
+
+# show metrics
+sum$which
+sum$adjr2 #look at adjr2, increases until 8 predictors are used and then stablizes
+sum$cp  #cp indicates that a model with 9 to 11 predictors is good
+
+metric <-data.frame(sum$which, sum$adjr2,sum$cp)
+metric
+
+#if we choose 9 predictors as the best model
+model.select <- lm(Price~.-Met_Color-Automatic,data=train.df)
+summary(model.select)
+select.pred <- predict(model.select, test.df)
+select.acc <- accuracy(select.pred, test.df$Price)
+select.acc
+
+
+
+
+# Active Playerbase Prediction
+
+steam_player <- select(steam, -SteamSpyOwners)
 
