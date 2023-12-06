@@ -6,6 +6,8 @@ library(caret)
 library(openxlsx)
 library(readxl)
 library(GGally)
+library(ggplot2)
+
 
 steam <- read_csv(file.choose())
 
@@ -203,6 +205,16 @@ for (colName in boolean_cols) {
 # Export csv for analysis using tableau
 #write.csv(steam, 'steam_games_cleaned_bin.csv', row.names = FALSE)
 
+# remove rows with target var = 0
+steam33 <- subset(steam, steam$SteamSpyPlayersEstimate > 0)
+
+summary(steam33$SteamSpyPlayersEstimate)
+summary(steam33$SteamSpyOwners)
+
+# normalize to handle outliers
+steam33$log_owner <- log(steam33$SteamSpyOwners, 10)
+steam33$log_players <- log(steam33$SteamSpyPlayersEstimate, 10)
+
 
 
 # Analysis and Predictions
@@ -210,95 +222,103 @@ for (colName in boolean_cols) {
 
 set.seed(123)
 
-# Demand Predictions
 
-steam_owner <- select(steam, -SteamSpyPlayersEstimate)
+# Game Demand prediction -------------------------------------------------------
 
-view(cor(steam_owner))
-
-steam_owner_split <- createDataPartition(steam_owner$SteamSpyOwners,p=0.6,list=FALSE)
-steam_owner.train.df  <- steam_owner[steam_owner_split,]
-trdf <- subset(steam_owner.train.df, steam_owner.train.df$SteamSpyOwners>0)
-steam_owner.test.df   <- steam_owner[-steam_owner_split,]
-tdf <- subset(steam_owner.test.df, steam_owner.test.df$SteamSpyOwners>0)
+steam_owner_split <- createDataPartition(steam33$log_owner,p=0.6,list=FALSE)
+steam_owner.train.df  <- steam33[steam_owner_split,]
+steam_owner.test.df   <- steam33[-steam_owner_split,]
 
 
-steam_owner.lm_1 <- lm(SteamSpyOwners ~.-Recommendations-Website-PCMinReqsText-PCRecReqsText-LinuxMinReqsText-LinuxRecReqsText-MacMinReqsText-MacRecReqsText,data=steam_owner.train.df)
-summary(steam_owner.lm_1)
-owner_vif <- vif(steam_owner.lm_1)
+steam_owner.lm.all <- lm(log_owner ~.-SteamSpyOwners-SteamSpyPlayersEstimate-log_players, data = steam_owner.train.df)
+summary(steam_owner.lm.all)
 
-names(select(steam_owner.train.df, -c(Recommendations,Website,PCMinReqsText,PCRecReqsText,LinuxMinReqsText,LinuxRecReqsText,MacMinReqsText,MacRecReqsText))[, owner_vif>5])
 
-steam_owner.lm_1_2 <- lm(SteamSpyOwners ~.-Recommendations-Website-PCMinReqsText-PCRecReqsText-LinuxMinReqsText-LinuxRecReqsText-MacMinReqsText-MacRecReqsText-PlatformWindows-PlatformLinux-PCReqsHaveRec-LinuxReqsHaveRec-PriceInitial-SupportURL-ShortDescrip-SupportedLanguages-Disapproval-DetailedDescrip-PlatformMac-MacReqsHaveMin,data=steam_owner.train.df)
-# steam_owner.lm_1_2 <- lm(SteamSpyOwners ~.,data=steam_owner.train.df)
+steam_owner.lm.all.pred<-predict(steam_owner.lm.all, steam_owner.test.df)
 
-summary(steam_owner.lm_1_2)
-vif(steam_owner.lm_1_2)
-steam_owner.lm.pred <-predict(steam_owner.lm_1_2, tdf)
+accuracy(steam_owner.lm.all.pred,steam_owner.test.df$log_owner) #accuracy measure
+all_acc_owner <- accuracy(steam_owner.lm.all.pred,steam_owner.test.df$log_owner) 
+all_acc_owner
 
-all.residuals <- tdf$SteamSpyOwners-steam_owner.lm.pred
-data.frame(tdf$SteamSpyOwners, steam_owner.lm.pred,all.residuals)
-accuracy(steam_owner.lm.pred,tdf$SteamSpyOwners) #accuracy measure
-all_acc <- accuracy(steam_owner.lm.pred,tdf$SteamSpyOwners) 
-all_acc
 
 # Stepwise methods
 
-owner_m1 <- train(SteamSpyOwners ~., data = steam_owner.train.df,trControl=trainControl(method='none'), method='glmStepAIC',direction='backward')
-owner_m2 <- train(SteamSpyOwners ~., data = steam_owner.train.df,trControl=trainControl(method='none'), method='glmStepAIC',direction='forward')
-owner_m3 <- train(SteamSpyOwners ~., data = steam_owner.train.df,trControl=trainControl(method='none'), method='glmStepAIC',direction='both')
+owner_m1 <- train(log_owner ~.-SteamSpyOwners-SteamSpyPlayersEstimate-log_players, data = steam_owner.train.df,trControl=trainControl(method='none'), method='glmStepAIC',direction='backward')
+owner_m2 <- train(log_owner ~.-SteamSpyOwners-SteamSpyPlayersEstimate-log_players, data = steam_owner.train.df,trControl=trainControl(method='none'), method='glmStepAIC',direction='forward')
+owner_m3 <- train(log_owner ~.-SteamSpyOwners-SteamSpyPlayersEstimate-log_players, data = steam_owner.train.df,trControl=trainControl(method='none'), method='glmStepAIC',direction='both')
 
-## choose the “optimal” model across these parameters
-##  estimate model performance from a training set
+
 coef(owner_m1$finalModel)
 coef(owner_m2$finalModel)
 coef(owner_m3$finalModel)
 
-#predictions
-steam_owner.lm.back.pred <- predict(owner_m1, tdf)
-steam_owner.lm.forw.pred <- predict(owner_m2, tdf)
-steam_owner.lm.both.pred <- predict(owner_m3, tdf)
 
-steam_owner.back_acc <- accuracy(steam_owner.lm.back.pred, tdf$SteamSpyOwners)
-steam_owner.forw_acc <- accuracy(steam_owner.lm.forw.pred, tdf$SteamSpyOwners)
-steam_owner.both_acc <- accuracy(steam_owner.lm.both.pred, tdf$SteamSpyOwners)
+steam_owner.lm.back.pred <- predict(owner_m1, steam_owner.test.df)
+steam_owner.lm.forw.pred <- predict(owner_m2, steam_owner.test.df)
+steam_owner.lm.both.pred <- predict(owner_m3, steam_owner.test.df)
 
-comp_1 <- rbind(steam_owner.back_acc, steam_owner.forw_acc, steam_owner.both_acc,all_acc)
-rownames(comp_1) <- c("Backwards","Forward","step","all")
-comp_1
+steam_owner.back_acc <- accuracy(steam_owner.lm.back.pred, steam_owner.test.df$log_owner)
+steam_owner.forw_acc <- accuracy(steam_owner.lm.forw.pred, steam_owner.test.df$log_owner)
+steam_owner.both_acc <- accuracy(steam_owner.lm.both.pred, steam_owner.test.df$log_owner)
 
+comp_owner <- rbind(steam_owner.back_acc, steam_owner.forw_acc, steam_owner.both_acc,all_acc_owner)
+rownames(comp_owner) <- c("Backwards","Forward","Stepwise","All")
+comp_owner
 
-###### EXHAUSTIVE SEARCH
-# use regsubsets() in package leaps to run an exhaustive search.
+summary(steam_owner.lm.all)
+all_acc_owner
 
-names(steam_owner.train.df)
-
-
-search <- regsubsets(SteamSpyOwners ~ ., data = steam_owner.train.df,  nvmax = ncol(steam_owner.train.df), 
-                     method = "exhaustive")
-#nvmax: maximum size of subsets to examine
-
-sum <- summary(search)
-
-# show metrics
-sum$which
-sum$adjr2 #look at adjr2, increases until 8 predictors are used and then stablizes
-sum$cp  #cp indicates that a model with 9 to 11 predictors is good
-
-metric <-data.frame(sum$which, sum$adjr2,sum$cp)
-metric
-
-#if we choose 9 predictors as the best model
-model.select <- lm(Price~.-Met_Color-Automatic,data=train.df)
-summary(model.select)
-select.pred <- predict(model.select, test.df)
-select.acc <- accuracy(select.pred, test.df$Price)
-select.acc
+write.csv(t(summary(steam_owner.lm.all)$coefficients)[1:2,], 'steam_games_demand_model_coeffs.csv', row.names = TRUE)
 
 
+# Active Player Base Prediction -----------------------------------------------
+
+steam_player_split <- createDataPartition(steam33$log_players,p=0.6,list=FALSE)
+steam_player.train.df  <- steam33[steam_player_split,]
+steam_player.test.df   <- steam33[-steam_player_split,]
 
 
-# Active Playerbase Prediction
+# All variables included
+steam_player.lm.all <- lm(log_players ~.-SteamSpyOwners-SteamSpyPlayersEstimate-log_owner, data = steam_player.train.df)
+summary(steam_player.lm.all)
 
-steam_player <- select(steam, -SteamSpyOwners)
+steam_player.lm.all.pred <-predict(steam_player.lm.all, steam_player.test.df)
+
+all_acc_plyr <- accuracy(steam_player.lm.all.pred,steam_player.test.df$log_players) 
+all_acc_plyr
+
+
+# Stepwise methods
+
+player_m1 <- train(log_players ~.-SteamSpyOwners-SteamSpyPlayersEstimate-log_owner, data = steam_player.train.df,trControl=trainControl(method='none'), method='glmStepAIC',direction='backward')
+player_m2 <- train(log_players ~.-SteamSpyOwners-SteamSpyPlayersEstimate-log_owner, data = steam_player.train.df,trControl=trainControl(method='none'), method='glmStepAIC',direction='forward')
+player_m3 <- train(log_players ~.-SteamSpyOwners-SteamSpyPlayersEstimate-log_owner, data = steam_player.train.df,trControl=trainControl(method='none'), method='glmStepAIC',direction='both')
+
+
+coef(player_m1$finalModel)
+coef(player_m2$finalModel)
+coef(player_m3$finalModel)
+
+
+steam_player.lm.back.pred <- predict(owner_m1, steam_player.test.df)
+steam_player.lm.forw.pred <- predict(owner_m2, steam_player.test.df)
+steam_player.lm.both.pred <- predict(owner_m3, steam_player.test.df)
+
+steam_player.back_acc <- accuracy(steam_player.lm.back.pred, steam_player.test.df$log_players)
+steam_player.forw_acc <- accuracy(steam_player.lm.forw.pred, steam_player.test.df$log_players)
+steam_player.both_acc <- accuracy(steam_player.lm.both.pred, steam_player.test.df$log_players)
+
+comp_player <- rbind(steam_player.back_acc, steam_player.forw_acc, steam_player.both_acc,all_acc_plyr)
+rownames(comp_player) <- c("Backwards","Forward","Stepwise","All")
+comp_player
+
+
+summary(steam_player.lm.all)
+all_acc_plyr
+
+write.csv(t(summary(steam_player.lm.all)$coefficients)[1:2,], 'steam_games_playerbase_model_coeffs.csv', row.names = TRUE)
+
+# Important!!!!! In order to get the actual usable predictions, prediction results should be raised to the power of 10 
+# Ex
+steam_owner.lm.pred^10
 
