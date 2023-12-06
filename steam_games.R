@@ -269,7 +269,7 @@ summary(steam_owner.lm.all)
 all_acc_owner
 
 write.csv(t(summary(steam_owner.lm.all)$coefficients)[1:2,], 'steam_games_demand_model_coeffs.csv', row.names = TRUE)
-
+write.csv(summary(steam_owner.lm.all)$coefficients, 'steam_games_demand_model.csv', row.names = TRUE)
 
 # Active Player Base Prediction -----------------------------------------------
 
@@ -317,6 +317,7 @@ summary(steam_player.lm.all)
 all_acc_plyr
 
 write.csv(t(summary(steam_player.lm.all)$coefficients)[1:2,], 'steam_games_playerbase_model_coeffs.csv', row.names = TRUE)
+write.csv(summary(steam_player.lm.all)$coefficients, 'steam_games_playerbase_model.csv', row.names = TRUE)
 
 # Important!!!!! In order to get the actual usable predictions, prediction results should be raised to the power of 10 
 # Ex
